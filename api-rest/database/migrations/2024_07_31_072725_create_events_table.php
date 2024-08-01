@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('events', function (Blueprint $table) {
             $table->id();
-            $table->string('titile', 256);
+            $table->string('title', 256);
             $table->string('description', 2048);
             $table->double('price')->nullable();
             $table->date('date');
