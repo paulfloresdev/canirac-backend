@@ -12,7 +12,7 @@ Route::post('auth/login', [AuthController::class, 'login']);
 Route::get('/memberships', [MembershipController::class, 'index']);
 Route::get('/memberships/{membership}', [MembershipController::class, 'show']);
 
-Route::get('events', [EventController::class, 'index']);
+Route::post('events-filtered', [EventController::class, 'index']);
 Route::get('events/upcoming', [EventController::class, 'upcoming']);
 Route::get('events/{event}', [EventController::class, 'show']);
 
@@ -25,6 +25,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::delete('/memberships/{membership}', [MembershipController::class, 'destroy']);
 
     Route::post('events', [EventController::class, 'store']);
-    Route::put('events/{event}', [EventController::class, 'update']);
-    Route::delete('events/{event}', [EventController::class, 'destroy']);
+    // Rutas para actualizar eventos
+    Route::put('/events/{event}', [EventController::class, 'update']);
+    Route::put('/events/{event}/details', [EventController::class, 'updateDetails']);
+    Route::post('/events/{event}/update-vertical-image', [EventController::class, 'updateVerticalImage']);
+    Route::post('/events/{event}/update-horizontal-image', [EventController::class, 'updateHorizontalImage']);
 });
