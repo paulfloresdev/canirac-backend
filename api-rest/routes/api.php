@@ -30,4 +30,5 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('/events/{event}/details', [EventController::class, 'updateDetails']);
     Route::post('/events/{event}/update-vertical-image', [EventController::class, 'updateVerticalImage']);
     Route::post('/events/{event}/update-horizontal-image', [EventController::class, 'updateHorizontalImage']);
+    Route::delete('/events/{event}', [EventController::class, 'destroy']);
 });
