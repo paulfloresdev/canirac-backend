@@ -66,7 +66,7 @@ class EventController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Upcoming events retrieved successfully',
+            'message' => 'Query completed successfully',
             'data' => $events,
         ], 200);
     }
@@ -136,6 +136,7 @@ class EventController extends Controller
 
         return response()->json([
             'status' => true,
+            'message' => 'Query completed successfully',
             'data' => $event
         ], 200);
     }

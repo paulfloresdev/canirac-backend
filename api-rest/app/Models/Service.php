@@ -5,26 +5,20 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Event extends Model
+class Service extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'title',
         'description',
+        'partner_price',
         'price',
         'date',
         'time',
         'address',
         'lat',
         'long',
-        'ver_img_path',
-        'hor_img_path',
-    ];
-
-    // Si deseas utilizar casts para los campos
-    protected $casts = [
-        'price' => 'float',
-        'date' => 'date',
+        'img_path',
     ];
 }
