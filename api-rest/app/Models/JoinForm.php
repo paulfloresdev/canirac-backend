@@ -49,5 +49,6 @@ class JoinForm extends Model
         'sv_have_lounge',
         'sv_lounge_capacity',
         'sv_other',
+        'status',
     ];
 }

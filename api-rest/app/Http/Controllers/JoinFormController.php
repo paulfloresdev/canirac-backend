@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\JoinForm;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon; // Asegúrate de importar Carbon
 
 class JoinFormController extends Controller
 {
@@ -17,6 +19,36 @@ class JoinFormController extends Controller
         ], 200);
     }
 
+    public function indexByStatus($status)
+    {
+        $joinForms = JoinForm::where('status', '=', $status);
+        return response()->json([
+            'status' => true,
+            'message' => 'Query completed successfully',
+            'data' => $joinForms,
+        ], 200);
+    }
+
+    public function getCharts()
+    {
+        $received = JoinForm::all()->count();
+        $unattended = JoinForm::where('status', '=', 1)->count();
+        $contacted = JoinForm::where('status', '=', 2)->count();
+        $failed = JoinForm::where('status', '=', 3)->count();
+        $joined = JoinForm::where('status', '=', 4)->count();
+
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Query completed successfully',
+            'received' => $received,
+            'unattended' => $unattended,
+            'contacted' => $contacted,
+            'failed' => $failed,
+            'joined' => $joined,
+        ], 200);
+    }
+
     public function show($id)
     {
         $joinForm = JoinForm::findOrFail($id);
@@ -27,9 +59,9 @@ class JoinFormController extends Controller
         ], 200);
     }
 
-    public function store(Request $request)
+    public function send(Request $request)
     {
-        $validated = $request->validate([
+        $rules = [
             'ins_comercial_name' => 'required|string|max:128',
             'ins_address' => 'required|string|max:256',
             'ins_hood' => 'required|string|max:128',
@@ -61,21 +93,155 @@ class JoinFormController extends Controller
             'sm_email' => 'required|email|max:256',
             'sm_phone' => 'required|string|max:13',
             'sm_web' => 'required|string|max:512',
-            'sm_other' => 'required|string|max:512',
+            'sm_other' => 'nullable|string|max:512',
             'sv_have_wifi' => 'required|boolean',
             'sv_have_ac' => 'required|boolean',
             'sv_have_live_music' => 'required|boolean',
             'sv_have_deck' => 'required|boolean',
             'sv_have_lounge' => 'required|boolean',
             'sv_lounge_capacity' => 'required|integer',
-            'sv_other' => 'required|string|max:512',
-        ]);
+            'sv_other' => 'nullable|string|max:512',
+        ];
 
-        $joinForm = JoinForm::create($validated);
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'errors' => $validator->errors()->all()
+            ], 400);
+        }
+
+        $data = $request->only([
+            'ins_comercial_name',
+            'ins_address',
+            'ins_hood',
+            'ins_cp',
+            'ins_email',
+            'com_capacity',
+            'com_male',
+            'com_female',
+            'com_open_date',
+            'com_license_status',
+            'com_license_type',
+            'tax_name',
+            'tax_rfc',
+            'tax_street',
+            'tax_hood',
+            'tax_cp',
+            'tax_locality',
+            'tax_payment',
+            'con_name',
+            'con_role',
+            'con_phone',
+            'con_email',
+            'com_hours',
+            'com_line',
+            'com_desc',
+            'sm_facebook',
+            'sm_instagram',
+            'sm_twitter',
+            'sm_email',
+            'sm_phone',
+            'sm_web',
+            'sm_other',
+            'sv_have_wifi',
+            'sv_have_ac',
+            'sv_have_live_music',
+            'sv_have_deck',
+            'sv_have_lounge',
+            'sv_lounge_capacity',
+            'sv_other',
+        ]);
+        $data['status'] = 1;
+
+        $joinForm = new JoinForm($data);
+
+        $now = Carbon::now()->toDateString();
+        $joinForm->arrived_date = $now;
+
+        $joinForm->save();
 
         return response()->json([
             'status' => true,
-            'message' => 'JoinForm created successfully',
+            'message' => 'JoinForm sent successfully',
+            'data' => $joinForm,
+        ], 200);
+    }
+
+    public function contacted($id)
+    {
+        $joinForm = JoinForm::findOrFail($id);
+
+        if ($joinForm->status != 1) {
+            return response()->json([
+                'status' => true,
+                'message' => 'Invalid change of status',
+                'data' => $joinForm,
+            ], 200);
+        }
+
+        $joinForm->status = 2;
+
+        $now = Carbon::now()->toDateString();
+        $joinForm->contacted_date = $now;
+
+        $joinForm->save();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'JoinForm contacted successfully',
+            'data' => $joinForm,
+        ], 200);
+    }
+
+    public function failed($id)
+    {
+        $joinForm = JoinForm::findOrFail($id);
+
+        if ($joinForm->status != 2 && $joinForm->status != 4) {
+            return response()->json([
+                'status' => true,
+                'message' => 'Invalid change of status',
+                'data' => $joinForm,
+            ], 200);
+        }
+
+        $joinForm->status = 3;
+
+        $now = Carbon::now()->toDateString();
+        $joinForm->finished_date = $now;
+
+        $joinForm->save();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'JoinForm failed successfully',
+            'data' => $joinForm,
+        ], 200);
+    }
+
+    public function joined($id)
+    {
+        $joinForm = JoinForm::findOrFail($id);
+
+        if ($joinForm->status != 2 && $joinForm->status != 3) {
+            return response()->json([
+                'status' => true,
+                'message' => 'Invalid change of status',
+                'data' => $joinForm,
+            ], 200);
+        }
+
+        $joinForm->status = 4;
+
+        $now = Carbon::now()->toDateString();
+        $joinForm->finished_date = $now;
+
+        $joinForm->save();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'JoinForm joined successfully',
             'data' => $joinForm,
         ], 200);
     }
@@ -124,6 +290,7 @@ class JoinFormController extends Controller
             'sv_have_lounge' => 'boolean',
             'sv_lounge_capacity' => 'integer',
             'sv_other' => 'string|max:512',
+            'status' => 'boolean'
         ]);
 
         $joinForm->update($validated);
@@ -134,6 +301,8 @@ class JoinFormController extends Controller
             'data' => $joinForm,
         ], 200);
     }
+
+
 
     public function destroy($id)
     {

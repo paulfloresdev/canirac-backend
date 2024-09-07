@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ChamberMemberController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MembershipController;
@@ -27,12 +28,13 @@ Route::get('events/{event}', [EventController::class, 'show']);
 
 // Services
 Route::post('services-filtered', [ServiceController::class, 'index']);
-Route::get('services/upcoming', [ServiceController::class, 'upcoming']);
+Route::get('services', [ServiceController::class, 'index']);
 Route::get('services/{service}', [ServiceController::class, 'show']);
 
 // Labels
 Route::get('labels', [LabelController::class, 'index']);
 Route::get('labels/{label}', [LabelController::class, 'show']);
+Route::get('show-video', [LabelController::class, 'showVideo']);
 
 // JoinForm
 Route::get('/joinforms', [JoinFormController::class, 'index']);
@@ -45,6 +47,10 @@ Route::get('/socialmedia/{id}', [SocialMediaController::class, 'show']);
 // Contact
 Route::get('/contact', [ContactController::class, 'index']);
 Route::get('/contact/{id}', [ContactController::class, 'show']);
+
+// ChamberMembers
+Route::get('/chamber-members', [ChamberMemberController::class, 'index']);
+Route::get('/chamber-members/{id}', [ChamberMemberController::class, 'show']);
 
 
 // AUTH SANCTUM
@@ -69,7 +75,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Services
     Route::post('services', [ServiceController::class, 'store']);
     Route::put('/services/{service}', [ServiceController::class, 'update']);
-    Route::put('/services/{service}/details', [ServiceController::class, 'updateDetails']);
+    Route::put('/services/{service}/details', [ServiceController::class, 'update']);
     Route::post('/services/{service}/update-image', [ServiceController::class, 'updateImage']);
     Route::delete('/services/{service}', [ServiceController::class, 'destroy']);
 
@@ -77,13 +83,21 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('labels', [LabelController::class, 'store']);
     Route::put('labels/{label}', [LabelController::class, 'update']);
     Route::delete('labels/{label}', [LabelController::class, 'destroy']);
+    Route::post('labels/upload-video', [LabelController::class, 'updateVideoLabel']);
+
 
     // JoinForms
-    Route::post('/joinforms', [JoinFormController::class, 'store']);
     Route::put('/joinforms/{id}', [JoinFormController::class, 'update']);
     Route::delete('/joinforms/{id}', [JoinFormController::class, 'destroy']);
 
-    // SocialMedia
+    Route::post('/joinforms', [JoinFormController::class, 'send']);
+    Route::post('/joinforms/see/{id}', [JoinFormController::class, 'see']);
+    Route::post('/joinforms/contacted/{id}', [JoinFormController::class, 'contacted']);
+    Route::post('/joinforms/failed/{id}', [JoinFormController::class, 'failed']);
+    Route::post('/joinforms/joined/{id}', [JoinFormController::class, 'joined']);
+    Route::get('/joinforms-charts', [JoinFormController::class, 'getCharts']);
+
+    // SocialMedias
     Route::post('/socialmedia', [SocialMediaController::class, 'store']);
     Route::put('/socialmedia/{id}', [SocialMediaController::class, 'update']);
     Route::delete('/socialmedia/{id}', [SocialMediaController::class, 'destroy']);
@@ -92,4 +106,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/contact', [ContactController::class, 'store']);
     Route::put('/contact/{id}', [ContactController::class, 'update']);
     Route::delete('/contact/{id}', [ContactController::class, 'destroy']);
+
+    // ChamberMembers
+    Route::post('/chamber-members', [ChamberMemberController::class, 'store']);
+    Route::put('/chamber-members/{id}', [ChamberMemberController::class, 'update']);
+    Route::delete('/chamber-members/{id}', [ChamberMemberController::class, 'destroy']);
+    Route::put('/chamber-members/{id}/update-data', [ChamberMemberController::class, 'updateData']);
+    Route::post('/chamber-members/{id}/update-img', [ChamberMemberController::class, 'updateImage']);
+    Route::delete('/chamber-members/delete/{id}', [ChamberMemberController::class, 'deleteMemberImage']);
 });

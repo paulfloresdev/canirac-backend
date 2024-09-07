@@ -29,16 +29,6 @@ class EventController extends Controller
             $events = Event::orderBy('date', 'asc')->get();
         }
 
-        $events->map(function ($event) {
-            if ($event->ver_img_path) {
-                $event->ver_img_path = Storage::url($event->ver_img_path);
-            }
-            if ($event->hor_img_path) {
-                $event->hor_img_path = Storage::url($event->hor_img_path);
-            }
-            return $event;
-        });
-
         return response()->json([
             'status' => true,
             'message' => 'Query completed successfully',
@@ -53,16 +43,6 @@ class EventController extends Controller
         $events = Event::where('date', '>=', $now)
             ->orderBy('date', 'asc') // Ordenar por fecha de más antigua a más reciente
             ->get();
-
-        $events->map(function ($event) {
-            if ($event->ver_img_path) {
-                $event->ver_img_path = Storage::url($event->ver_img_path);
-            }
-            if ($event->hor_img_path) {
-                $event->hor_img_path = Storage::url($event->hor_img_path);
-            }
-            return $event;
-        });
 
         return response()->json([
             'status' => true,
@@ -111,13 +91,6 @@ class EventController extends Controller
         $event = new Event($data);
         $event->save();
 
-        if ($event->ver_img_path) {
-            $event->ver_img_path = Storage::url($event->ver_img_path);
-        }
-        if ($event->hor_img_path) {
-            $event->hor_img_path = Storage::url($event->hor_img_path);
-        }
-
         return response()->json([
             'status' => true,
             'message' => 'Event created successfully',
@@ -127,13 +100,6 @@ class EventController extends Controller
 
     public function show(Event $event)
     {
-        if ($event->ver_img_path) {
-            $event->ver_img_path = Storage::url($event->ver_img_path);
-        }
-        if ($event->hor_img_path) {
-            $event->hor_img_path = Storage::url($event->hor_img_path);
-        }
-
         return response()->json([
             'status' => true,
             'message' => 'Query completed successfully',
@@ -186,13 +152,6 @@ class EventController extends Controller
         }
 
         $event->update($data);
-
-        if ($event->ver_img_path) {
-            $event->ver_img_path = Storage::url($event->ver_img_path);
-        }
-        if ($event->hor_img_path) {
-            $event->hor_img_path = Storage::url($event->hor_img_path);
-        }
 
         return response()->json([
             'status' => true,
@@ -264,10 +223,6 @@ class EventController extends Controller
             $event->update($data);
         }
 
-        if ($event->ver_img_path) {
-            $event->ver_img_path = Storage::url($event->ver_img_path);
-        }
-
         return response()->json([
             'status' => true,
             'message' => 'Vertical image updated successfully',
@@ -302,10 +257,6 @@ class EventController extends Controller
 
         if (!empty($data)) {
             $event->update($data);
-        }
-
-        if ($event->hor_img_path) {
-            $event->hor_img_path = Storage::url($event->hor_img_path);
         }
 
         return response()->json([

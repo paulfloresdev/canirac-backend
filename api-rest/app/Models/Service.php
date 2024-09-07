@@ -2,23 +2,22 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Service extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'title',
         'description',
-        'partner_price',
-        'price',
-        'date',
-        'time',
-        'address',
-        'lat',
-        'long',
+        'contact_name',
+        'phone',
         'img_path',
     ];
+
+    public $timestamps = true;
+
+    public function getImgPathAttribute($value)
+    {
+        return $value ? asset('storage/' . $value) : null;
+    }
 }

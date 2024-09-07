@@ -6,54 +6,12 @@ use Illuminate\Http\Request;
 use App\Models\Service;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
-use Carbon\Carbon;
 
 class ServiceController extends Controller
 {
     public function index(Request $request)
     {
-        $filter = $request->input('filter');
-
-        if ($filter == 1) {
-            $services = Service::where('date', '<', Carbon::now()->toDateString())
-                ->orderBy('date', 'asc')
-                ->get();
-        } elseif ($filter == 2) {
-            $services = Service::where('date', '>', Carbon::yesterday()->toDateString())
-                ->orderBy('date', 'asc')
-                ->get();
-        } else {
-            $services = Service::orderBy('date', 'asc')->get();
-        }
-
-        $services->map(function ($service) {
-            if ($service->img_path) {
-                $service->img_path = Storage::url($service->img_path);
-            }
-            return $service;
-        });
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Query completed successfully',
-            'data' => $services,
-        ], 200);
-    }
-
-    public function upcoming()
-    {
-        $now = Carbon::now()->toDateString();
-
-        $services = Service::where('date', '>=', $now)
-            ->orderBy('date', 'asc')
-            ->get();
-
-        $services->map(function ($service) {
-            if ($service->img_path) {
-                $service->img_path = Storage::url($service->img_path);
-            }
-            return $service;
-        });
+        $services = Service::orderBy('title', 'asc')->get();
 
         return response()->json([
             'status' => true,
@@ -67,14 +25,9 @@ class ServiceController extends Controller
         $rules = [
             'title' => 'required|string|max:256',
             'description' => 'required|string|max:2048',
-            'partner_price' => 'nullable|numeric',
-            'price' => 'nullable|numeric',
-            'date' => 'required|date',
-            'time' => 'required|string|max:32',
-            'address' => 'required|string|max:256',
-            'lat' => 'nullable|numeric',
-            'long' => 'nullable|numeric',
-            'img' => 'image|max:2048',
+            'contact_name' => 'required|string|max:128',
+            'phone' => 'required|string|max:13',
+            'img' => 'nullable|image|max:2048',
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -85,34 +38,29 @@ class ServiceController extends Controller
             ], 400);
         }
 
-        $data = $request->only(['title', 'description', 'partner_price', 'price', 'date', 'time', 'address', 'lat', 'long']);
+        $data = $request->only(['title', 'description', 'contact_name', 'phone']);
 
+        // Verificar si se subió una imagen y procesarla
         if ($request->hasFile('img')) {
             $image = $request->file('img');
-            $path = $image->store('services', 'public');
+            $path = $image->store('services', 'public'); // Guarda solo el path relativo
             $data['img_path'] = $path;
         }
 
         $service = new Service($data);
         $service->save();
 
-        if ($service->img_path) {
-            $service->img_path = Storage::url($service->img_path);
-        }
-
         return response()->json([
             'status' => true,
-            'message' => 'Service created successfully',
+            'message' => 'Spervice created successfully',
             'data' => $service,
         ], 200);
     }
 
+
+
     public function show(Service $service)
     {
-        if ($service->img_path) {
-            $service->img_path = Storage::url($service->img_path);
-        }
-
         return response()->json([
             'status' => true,
             'message' => 'Query completed successfully',
@@ -125,14 +73,8 @@ class ServiceController extends Controller
         $rules = [
             'title' => 'required|string|max:256',
             'description' => 'required|string|max:2048',
-            'partner_price' => 'nullable|numeric',
-            'price' => 'nullable|numeric',
-            'date' => 'required|date',
-            'time' => 'required|string|max:32',
-            'address' => 'required|string|max:256',
-            'lat' => 'nullable|numeric',
-            'long' => 'nullable|numeric',
-            'img' => 'image|max:2048',
+            'contact_name' => 'required|string|max:128',
+            'phone' => 'required|string|max:13'
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -143,59 +85,13 @@ class ServiceController extends Controller
             ], 400);
         }
 
-        $data = $request->only(['title', 'description', 'partner_price', 'price', 'date', 'time', 'address', 'lat', 'long']);
-
-        if ($request->hasFile('img')) {
-            if ($service->img_path) {
-                Storage::disk('public')->delete($service->img_path);
-            }
-            $image = $request->file('img');
-            $path = $image->store('services', 'public');
-            $data['img_path'] = $path;
-        }
+        $data = $request->only(['title', 'description', 'contact_name', 'phone']);
 
         $service->update($data);
-
-        if ($service->img_path) {
-            $service->img_path = Storage::url($service->img_path);
-        }
 
         return response()->json([
             'status' => true,
             'message' => 'Service updated successfully',
-            'data' => $service,
-        ], 200);
-    }
-
-    public function updateDetails(Request $request, Service $service)
-    {
-        $rules = [
-            'title' => 'required|string|max:256',
-            'description' => 'required|string|max:2048',
-            'partner_price' => 'nullable|numeric',
-            'price' => 'nullable|numeric',
-            'date' => 'required|date',
-            'time' => 'required|string|max:32',
-            'address' => 'required|string|max:256',
-            'lat' => 'nullable|numeric',
-            'long' => 'nullable|numeric',
-        ];
-
-        $validator = Validator::make($request->all(), $rules);
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => false,
-                'errors' => $validator->errors()->all()
-            ], 400);
-        }
-
-        $data = $request->only(['title', 'description', 'partner_price', 'price', 'date', 'time', 'address', 'lat', 'long']);
-
-        $service->update($data);
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Service details updated successfully',
             'data' => $service,
         ], 200);
     }
@@ -221,8 +117,6 @@ class ServiceController extends Controller
             $image = $request->file('img');
             $path = $image->store('services', 'public');
             $service->update(['img_path' => $path]);
-
-            $service->img_path = Storage::url($service->img_path);
         }
 
         return response()->json([

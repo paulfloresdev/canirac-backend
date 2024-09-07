@@ -44,14 +44,19 @@ return new class extends Migration
             $table->string('sm_email', 256);
             $table->string('sm_phone', 13);
             $table->string('sm_web', 512);
-            $table->string('sm_other', 512);
+            $table->string('sm_other', 512)->nullable();
             $table->boolean('sv_have_wifi');
             $table->boolean('sv_have_ac');
             $table->boolean('sv_have_live_music');
             $table->boolean('sv_have_deck');
             $table->boolean('sv_have_lounge');
             $table->integer('sv_lounge_capacity');
-            $table->string('sv_other', 512);
+            $table->string('sv_other', 512)->nullable();
+            $table->integer('status');
+            $table->date('arrived_date')->nullable();
+            $table->date('watched_date')->nullable();
+            $table->date('contacted_date')->nullable();
+            $table->date('finished_date')->nullable();
             $table->timestamps();
         });
     }

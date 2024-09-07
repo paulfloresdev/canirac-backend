@@ -27,4 +27,26 @@ class Event extends Model
         'price' => 'float',
         'date' => 'date',
     ];
+
+    /**
+     * Obtener la URL completa de la imagen vertical.
+     *
+     * @param  string|null  $value
+     * @return string|null
+     */
+    public function getVerImgPathAttribute($value)
+    {
+        return $value ? asset('storage/' . $value) : null;
+    }
+
+    /**
+     * Obtener la URL completa de la imagen horizontal.
+     *
+     * @param  string|null  $value
+     * @return string|null
+     */
+    public function getHorImgPathAttribute($value)
+    {
+        return $value ? asset('storage/' . $value) : null;
+    }
 }
